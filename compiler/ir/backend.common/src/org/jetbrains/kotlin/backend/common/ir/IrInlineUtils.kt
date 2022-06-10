@@ -31,11 +31,6 @@ class IrInlinableLambda(val function: IrSimpleFunction, val boundReceiver: IrVal
 
 // Return the underlying function for a lambda argument without bound or default parameters or varargs.
 private fun IrExpression.asInlinableLambda(builder: IrStatementsBuilder<*>): IrInlinableLambda? {
-    if (this is IrFunctionExpression) {
-        if (function.valueParameters.any { it.isVararg || it.defaultValue != null })
-            return null
-        return IrInlinableLambda(function, null)
-    }
     // A lambda is represented as a block with a function declaration and a reference to it.
     // Inlinable function references are also a kind of lambda; bound receivers are represented as extension receivers.
     if (this !is IrBlock || statements.size != 2)
