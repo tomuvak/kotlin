@@ -30422,6 +30422,12 @@ public class FirOldFrontendDiagnosticsWithLightTreeTestGenerated extends Abstrac
                 }
 
                 @Test
+                @TestMetadata("leakingLambdaInCalledInPlace.kt")
+                public void testLeakingLambdaInCalledInPlace() throws Exception {
+                    runTest("compiler/testData/diagnostics/tests/smartCasts/varnotnull/leakingLambdaInCalledInPlace.kt");
+                }
+
+                @Test
                 @TestMetadata("nestedDoWhile.kt")
                 public void testNestedDoWhile() throws Exception {
                     runTest("compiler/testData/diagnostics/tests/smartCasts/varnotnull/nestedDoWhile.kt");
