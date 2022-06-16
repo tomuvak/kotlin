@@ -5,6 +5,8 @@
 
 package plugins
 
+import groovy.util.Node
+import groovy.util.NodeList
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.attributes.Usage
@@ -124,6 +126,13 @@ fun MavenPublication.configureKotlinPomAttributes(project: Project, explicitDesc
                 name.set("Kotlin Team")
                 organization.set("JetBrains")
                 organizationUrl.set("https://www.jetbrains.com")
+            }
+        }
+        withXml {
+            val root = asNode()
+            val nodes = root["dependencyManagement"] as NodeList
+            if (nodes.isNotEmpty()) {
+                root.remove(nodes.first() as Node)
             }
         }
     }
