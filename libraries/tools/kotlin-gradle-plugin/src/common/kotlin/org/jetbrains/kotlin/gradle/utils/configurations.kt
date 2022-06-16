@@ -23,7 +23,7 @@ const val RUNTIME_ONLY = "runtimeOnly"
 const val RUNTIME = "runtime"
 internal const val INTRANSITIVE = "intransitive"
 
-private class UnserializableLazy<T: Any>(
+internal class UnserializableLazy<T: Any>(
     private val initializer: () -> T
 ) : Lazy<T> {
     @Volatile
