@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
 import org.jetbrains.kotlin.gradle.targets.js.ir.KotlinJsIrLink
+import java.time.Duration
 
 plugins {
     `maven-publish`
@@ -76,7 +77,11 @@ val commonTestSources by task<Sync> {
 
 kotlin {
     wasm {
-        nodejs()
+        d8()
+    }
+    //TODO Replace with D8 dsl with runTask after bootstrap
+    tasks.getByName<Task>("wasmD8Test") {
+        timeout.set(Duration.ofSeconds(20))
     }
 
     sourceSets {
