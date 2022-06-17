@@ -23,28 +23,6 @@ const val RUNTIME_ONLY = "runtimeOnly"
 const val RUNTIME = "runtime"
 internal const val INTRANSITIVE = "intransitive"
 
-internal class UnserializableLazy<T: Any>(
-    private val initializer: () -> T
-) : Lazy<T> {
-    @Volatile
-    @Transient
-    private var _value: T? = null
-    override fun isInitialized(): Boolean = _value != null
-    override val value get(): T {
-        val v1 = _value
-        if (v1 != null) return v1
-
-        return synchronized(this) {
-            val v2 = _value
-            if (v2 == null) {
-                 initializer().also { _value = it }
-            } else {
-                v2
-            }
-        }
-    }
-}
-
 /**
  * Gradle Configuration Cache-friendly representation of resolved Configuration
  */
@@ -57,7 +35,7 @@ private constructor (
     val files: FileCollection get() = artifactCollection.artifactFiles
     val artifacts get() = artifactCollection.artifacts
 
-    private val artifactsByComponentId by UnserializableLazy { artifacts.groupBy { it.id.componentIdentifier } }
+    private val artifactsByComponentId by TransientLazy { artifacts.groupBy { it.id.componentIdentifier } }
 
     val allDependencies: List<DependencyResult> get() {
         fun DependencyResult.allDependenciesRecursive(): List<DependencyResult> =
