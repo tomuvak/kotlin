@@ -29,7 +29,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
         val files = hashSetOf<Path>()
 
         val visitor = fileVisitor {
-            preVisitDirectory { directory, _ ->
+            onPreVisitDirectory { directory, _ ->
                 assertFalse(directory in preVisit)
                 if (directory == basedir) {
                     assertTrue(preVisit.isEmpty())
@@ -41,7 +41,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
                 FileVisitResult.CONTINUE
             }
 
-            visitFile { file, _ ->
+            onVisitFile { file, _ ->
                 assertTrue(file.parent in preVisit)
                 assertFalse(file.parent in postVisit)
                 files.add(file)
@@ -49,7 +49,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
                 FileVisitResult.CONTINUE
             }
 
-            postVisitDirectory { directory, exception ->
+            onPostVisitDirectory { directory, exception ->
                 assertNull(exception)
                 assertTrue(directory in preVisit)
                 assertFalse(directory in postVisit)
@@ -74,8 +74,8 @@ class FileVisitorBuilderTest : AbstractPathTest() {
     fun overrideOnce() {
         assertFailsWith<IllegalStateException> {
             fileVisitor {
-                visitFile { _, _ -> FileVisitResult.CONTINUE }
-                visitFile { _, _ -> FileVisitResult.CONTINUE }
+                onVisitFile { _, _ -> FileVisitResult.CONTINUE }
+                onVisitFile { _, _ -> FileVisitResult.CONTINUE }
             }
         }
     }
@@ -85,7 +85,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
         val builder: FileVisitorBuilder
         fileVisitor { builder = this }
         assertFailsWith<IllegalStateException> {
-            builder.visitFile { _, _ -> FileVisitResult.CONTINUE }
+            builder.onVisitFile { _, _ -> FileVisitResult.CONTINUE }
         }
     }
 
@@ -102,7 +102,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
         var didFail = false
 
         basedir.visitFileTree {
-            visitFileFailed { file, exception ->
+            onVisitFileFailed { file, exception ->
                 assertEquals(restrictedDir, file)
                 assertIs<AccessDeniedException>(exception)
 
@@ -122,14 +122,14 @@ class FileVisitorBuilderTest : AbstractPathTest() {
         val visitedFiles = mutableListOf<Path>()
 
         basedir.visitFileTree {
-            preVisitDirectory { directory, _ ->
+            onPreVisitDirectory { directory, _ ->
                 if (directory == dirToSkip)
                     FileVisitResult.SKIP_SUBTREE
                 else
                     FileVisitResult.CONTINUE
             }
 
-            visitFile { file, _ ->
+            onVisitFile { file, _ ->
                 assertTrue(file.parent != dirToSkip)
 
                 visitedFiles.add(file)
@@ -146,7 +146,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
         val basedir = createTestFiles().cleanupRecursively()
 
         val visitor = fileVisitor {
-            visitFile { file, _ ->
+            onVisitFile { file, _ ->
                 assertNotEquals("1/3/5.txt", file.relativeToOrSelf(basedir).invariantSeparatorsPathString)
                 assertNotEquals("1/3/6.txt", file.relativeToOrSelf(basedir).invariantSeparatorsPathString)
                 FileVisitResult.CONTINUE
@@ -165,7 +165,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
         // directory "8" contains "9.txt" file
         var didFollowLinks = false
         val visitor = fileVisitor {
-            visitFile { file, _ ->
+            onVisitFile { file, _ ->
                 if (file.relativeToOrSelf(basedir).invariantSeparatorsPathString == "1/3/link/9.txt") {
                     didFollowLinks = true
                 }
@@ -189,7 +189,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
         srcRoot.resolve("1/3/.file").createFile()
 
         srcRoot.visitFileTree {
-            preVisitDirectory { directory, _ ->
+            onPreVisitDirectory { directory, _ ->
                 if (directory.name.startsWith(".")) {
                     FileVisitResult.SKIP_SUBTREE
                 } else {
@@ -201,7 +201,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
                 }
             }
 
-            visitFile { file, _ ->
+            onVisitFile { file, _ ->
                 if (!file.name.startsWith(".")) {
                     val dst = dstRoot.resolve(file.relativeTo(srcRoot))
                     file.copyTo(dst, StandardCopyOption.COPY_ATTRIBUTES)
@@ -221,12 +221,12 @@ class FileVisitorBuilderTest : AbstractPathTest() {
         val basedir = createTestFiles()
 
         basedir.visitFileTree {
-            visitFile { file, _ ->
+            onVisitFile { file, _ ->
                 file.deleteExisting()
                 FileVisitResult.CONTINUE
             }
 
-            postVisitDirectory { directory, _ ->
+            onPostVisitDirectory { directory, _ ->
                 directory.deleteExisting()
                 FileVisitResult.CONTINUE
             }
@@ -236,7 +236,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
     }
 
     private fun deleteWith(excludePredicate: (Path) -> Boolean) = fileVisitor {
-        preVisitDirectory { directory, _ ->
+        onPreVisitDirectory { directory, _ ->
             if (excludePredicate(directory)) {
                 FileVisitResult.SKIP_SUBTREE
             } else {
@@ -244,14 +244,14 @@ class FileVisitorBuilderTest : AbstractPathTest() {
             }
         }
 
-        visitFile { file, _ ->
+        onVisitFile { file, _ ->
             if (!excludePredicate(file)) {
                 file.deleteExisting()
             }
             FileVisitResult.CONTINUE
         }
 
-        postVisitDirectory { directory, _ ->
+        onPostVisitDirectory { directory, _ ->
             val shouldDelete = directory.useDirectoryEntries { it.none() }
             if (shouldDelete) {
                 directory.deleteExisting()
@@ -280,7 +280,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
     }
 
     private fun zipify(rootPath: Path, zipOutputStream: ZipOutputStream): FileVisitor<Path> = fileVisitor {
-        preVisitDirectory { directory, _ ->
+        onPreVisitDirectory { directory, _ ->
             if (directory != rootPath) {
                 val entry = ZipEntry(directory.relativeTo(rootPath).toString())
 
@@ -290,7 +290,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
             FileVisitResult.CONTINUE
         }
 
-        visitFile { file, attributes ->
+        onVisitFile { file, attributes ->
             val entry = ZipEntry(file.relativeTo(rootPath).toString())
 
             entry.size = attributes.size()
@@ -301,7 +301,7 @@ class FileVisitorBuilderTest : AbstractPathTest() {
             FileVisitResult.CONTINUE
         }
 
-        visitFileFailed { _, exception ->
+        onVisitFileFailed { _, exception ->
             zipOutputStream.close()
 
             throw exception

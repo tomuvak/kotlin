@@ -16,7 +16,7 @@ class Path {
     fun fileVisitor() {
         val cleanVisitor = fileVisitor {
 
-            visitFile { file, _ ->
+            onVisitFile { file, _ ->
                 if (file.parent?.name == "build") {
                     FileVisitResult.SKIP_SIBLINGS
                 } else {
@@ -27,7 +27,7 @@ class Path {
                 }
             }
 
-            postVisitDirectory { directory, exception ->
+            onPostVisitDirectory { directory, exception ->
                 if (exception != null) {
                     throw exception
                 }
