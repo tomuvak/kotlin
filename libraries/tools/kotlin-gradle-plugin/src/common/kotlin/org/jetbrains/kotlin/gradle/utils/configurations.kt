@@ -28,10 +28,10 @@ internal const val INTRANSITIVE = "intransitive"
  */
 internal class ResolvedDependencyGraph
 private constructor(
-    private val resolvedComponentsRootProvider: Provider<ResolvedComponentResult>,
+    private val resolvedComponentsRootProvider: Lazy<ResolvedComponentResult>,
     private val artifactCollection: ArtifactCollection
 ) {
-    val root get() = resolvedComponentsRootProvider.get()
+    val root get() = resolvedComponentsRootProvider.value
     val files: FileCollection get() = artifactCollection.artifactFiles
     val artifacts get() = artifactCollection.artifacts
 
@@ -54,8 +54,8 @@ private constructor(
     }
 
     companion object {
-        operator fun invoke(project: Project, configuration: Configuration) = ResolvedDependencyGraph(
-            resolvedComponentsRootProvider = configuration.incoming.resolutionResult.let { rr -> project.provider { rr.root } },
+        fun fromConfiguration(configuration: Configuration) = ResolvedDependencyGraph(
+            resolvedComponentsRootProvider = configuration.incoming.resolutionResult.let { rr -> lazy { rr.root } },
             artifactCollection = configuration.incoming.artifacts
         )
     }
