@@ -19,9 +19,9 @@ class IrInterpreterHelpersSourceFilesProvider(testServices: TestServices) : Addi
         private const val HELPERS_PATH = "./compiler/testData/ir/interpreter/helpers"
         private const val UNSIGNED_PATH = "./libraries/stdlib/unsigned/src/kotlin"
         private val RUNTIME_PATHS = arrayOf(
-            "./core/builtins/src/kotlin/Progressions.kt",
-            "./core/builtins/src/kotlin/ProgressionIterators.kt",
-            "./core/builtins/src/kotlin/internal/progressionUtil.kt",
+            "./libraries/stdlib/src/kotlin/Progressions.kt",
+            "./libraries/stdlib/src/kotlin/ProgressionIterators.kt",
+            "./libraries/stdlib/src/kotlin/internal/progressionUtil.kt",
             "./libraries/stdlib/jvm/runtime/kotlin/TypeAliases.kt",
             "./libraries/stdlib/jvm/runtime/kotlin/text/TypeAliases.kt",
             "./libraries/stdlib/jvm/src/kotlin/collections/TypeAliases.kt",
