@@ -147,6 +147,8 @@ class PathTreeWalkTest : AbstractPathTest() {
             walk.toList()
         }
         assertEquals(restrictedDir.toString(), error.file)
+
+        restrictedDir.toFile().setReadable(true)
     }
 
     @Test

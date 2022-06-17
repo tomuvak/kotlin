@@ -113,6 +113,8 @@ class FileVisitorBuilderTest : AbstractPathTest() {
         }
 
         assertTrue(didFail)
+
+        restrictedDir.toFile().setReadable(true)
     }
 
     @Test
