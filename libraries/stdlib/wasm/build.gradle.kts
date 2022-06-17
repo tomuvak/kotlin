@@ -79,10 +79,6 @@ kotlin {
     wasm {
         d8()
     }
-    //TODO Replace with D8 dsl with runTask after bootstrap
-    tasks.getByName<Task>("wasmD8Test") {
-        timeout.set(Duration.ofSeconds(20))
-    }
 
     sourceSets {
         val wasmMain by getting {
