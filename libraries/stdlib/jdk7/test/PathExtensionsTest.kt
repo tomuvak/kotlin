@@ -155,6 +155,9 @@ class PathExtensionsTest : AbstractPathTest() {
 
         srcDirectory.copyTo(dstDirectory)
         assertFalse(dstDirectory.isReadable())
+
+        srcDirectory.toFile().setReadable(true)
+        dstDirectory.toFile().setReadable(true)
     }
 
     @Test
