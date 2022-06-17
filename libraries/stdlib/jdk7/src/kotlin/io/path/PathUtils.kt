@@ -1101,6 +1101,7 @@ public fun Path.copyToRecursively(
             src.copyTo(dst, *options)
         }
         // else: do nothing, the destination directory already exists
+        // TODO: Maybe copy attributes and permissions then? See how `cp` utility overrides
     }
 ): Unit {
     if (!exists(LinkOption.NOFOLLOW_LINKS)) {
@@ -1113,10 +1114,10 @@ public fun Path.copyToRecursively(
         // * REPLACE_EXISTING: If the target file exists and is a symbolic link,
         // * then the symbolic link itself, not the target of the link, is replaced.
         // For src it is not known if links are followed in copyAction
-        val dst = target.resolve(src.relativeTo(this))
+        val dst = target.resolve(src.relativeToOrSelf(this))
         copyAction(src, dst)
     }.onFile { _, src ->
-        val dst = target.resolve(src.relativeTo(this))
+        val dst = target.resolve(src.relativeToOrSelf(this))
         copyAction(src, dst)
     }.onFail { _, exception ->
         suppressedExceptions.add(exception)
