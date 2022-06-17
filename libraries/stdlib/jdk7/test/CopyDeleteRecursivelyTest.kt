@@ -264,17 +264,20 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         val src = createTempFile().cleanup().also { it.writeText("hello") }
         val dst = createTempDirectory().cleanupRecursively().resolve("dst")
 
-        src.copyToRecursively(dst)
+        src.copyToRecursively(dst, followLinks = false)
         compareFiles(src, dst)
 
         dst.writeText("bye")
         val error = assertFailsWith<java.nio.file.FileSystemException> {
-            src.copyToRecursively(dst)
+            src.copyToRecursively(dst, followLinks = false)
         }
         assertIs<java.nio.file.FileAlreadyExistsException>(error.suppressedExceptions.single())
         assertEquals("bye", dst.readText())
 
-        src.copyToRecursively(dst) { source, target -> source.copyTo(target, overwrite = true) }
+        src.copyToRecursively(dst, followLinks = false) { source, target ->
+            source.copyTo(target, overwrite = true)
+            CopyActionResult.CONTINUE
+        }
         compareFiles(src, dst)
     }
 
@@ -284,20 +287,26 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         val dst = createTestFiles().cleanupRecursively()
 
         val existsError = assertFailsWith<java.nio.file.FileSystemException> {
-            src.copyToRecursively(dst)
+            src.copyToRecursively(dst, followLinks = false)
         }
         assertIs<java.nio.file.FileAlreadyExistsException>(existsError.suppressedExceptions.single())
         assertTrue(dst.isDirectory())
 
         val notEmptyException = assertFailsWith<java.nio.file.FileSystemException> {
-            src.copyToRecursively(dst) { source, target -> source.copyTo(target, overwrite = true) }
+            src.copyToRecursively(dst, followLinks = false) { source, target ->
+                source.copyTo(target, overwrite = true)
+                CopyActionResult.CONTINUE
+            }
         }
         assertIs<java.nio.file.DirectoryNotEmptyException>(notEmptyException.suppressedExceptions.single())
         assertTrue(dst.isDirectory())
 
         dst.deleteRecursively()
         dst.createDirectory()
-        src.copyToRecursively(dst) { source, target -> source.copyTo(target, overwrite = true) }
+        src.copyToRecursively(dst, followLinks = false) { source, target ->
+            source.copyTo(target, overwrite = true)
+            CopyActionResult.CONTINUE
+        }
         compareFiles(src, dst)
     }
 
@@ -306,13 +315,13 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         val src = createTestFiles().cleanupRecursively()
         val dst = createTempDirectory().cleanupRecursively().resolve("dst")
 
-        src.copyToRecursively(dst)
+        src.copyToRecursively(dst, followLinks = false)
         compareDirectories(src, dst)
 
         src.resolve("1/3/4.txt").writeText("hello")
         dst.resolve("10").createDirectory()
         assertFailsWith<java.nio.file.FileSystemException> {
-            src.copyToRecursively(dst)
+            src.copyToRecursively(dst, followLinks = false)
         }.let { exception ->
             assertEquals(referenceFilesOnly.size, exception.suppressedExceptions.size)
             assertTrue(exception.suppressedExceptions.all { it is java.nio.file.FileAlreadyExistsException })
@@ -320,8 +329,9 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         assertTrue(dst.resolve("1/3/4.txt").readText().isEmpty())
 
         assertFailsWith<java.nio.file.FileSystemException> {
-            src.copyToRecursively(dst) { source, target ->
+            src.copyToRecursively(dst, followLinks = false) { source, target ->
                 source.copyTo(target, overwrite = true)
+                CopyActionResult.CONTINUE
             }
         }.let { exception ->
             // non-empty directories: "", "1", "1/3", "8"
@@ -338,7 +348,7 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         val dst = createTempFile().cleanupRecursively().also { it.writeText("hello") }
 
         assertFailsWith<java.nio.file.FileSystemException> {
-            src.copyToRecursively(dst)
+            src.copyToRecursively(dst, followLinks = false)
         }.let { exception ->
             // attempted to copy each file from src to dst, where a file already exists
             assertEquals(referenceFilenames.size + 1 /* root dir */, exception.suppressedExceptions.size)
@@ -347,7 +357,10 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         }
         assertTrue(dst.isRegularFile())
 
-        src.copyToRecursively(dst) { source, target -> source.copyTo(target, overwrite = true) }
+        src.copyToRecursively(dst, followLinks = false) { source, target ->
+            source.copyTo(target, overwrite = true)
+            CopyActionResult.CONTINUE
+        }
         compareDirectories(src, dst)
     }
 
@@ -357,16 +370,13 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         val dst = createTempDirectory()
 
         assertFailsWith(NoSuchFileException::class) {
-            src.copyToRecursively(dst)
+            src.copyToRecursively(dst, followLinks = false)
         }
 
         dst.deleteExisting()
         assertFailsWith(NoSuchFileException::class) {
-            src.copyToRecursively(dst)
+            src.copyToRecursively(dst, followLinks = false)
         }
-
-//        assertTrue(src.copyToRecursively(dst) { _, _ -> OnErrorAction.SKIP })
-//        assertFalse(src.copyToRecursively(dst) { _, _ -> OnErrorAction.TERMINATE })
     }
 
     @Test
@@ -377,11 +387,11 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         assertFalse(dst.parent.exists())
 
         val error = assertFailsWith<java.nio.file.FileSystemException> {
-            src.copyToRecursively(dst)
+            src.copyToRecursively(dst, followLinks = false)
         }
         assertIs<java.nio.file.NoSuchFileException>(error.suppressed.single())
 
-        src.copyToRecursively(dst.apply { parent?.createDirectories() })
+        src.copyToRecursively(dst.apply { parent?.createDirectories() }, followLinks = false)
     }
 
     @Test
@@ -391,7 +401,7 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
 
         dst.resolve("8").deleteRecursively()
         val existingNames = hashSetOf<String>()
-        src.copyToRecursively(dst) { source, target ->
+        src.copyToRecursively(dst, followLinks = false) { source, target ->
             try {
                 if (!source.isDirectory() || !target.isDirectory())
                     source.copyTo(target)
@@ -399,6 +409,7 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
                 existingNames.add(target.relativeToOrSelf(dst).invariantSeparatorsPathString)
                 // ignore exception
             }
+            CopyActionResult.CONTINUE
         }
         assertEquals(setOf("1/3/4.txt", "1/3/5.txt", "7.txt"), existingNames)
         compareDirectories(src, dst)
@@ -413,11 +424,13 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
 
         withRestrictedRead(restricted) {
             val error = assertFailsWith<java.nio.file.FileSystemException> {
-                src.copyToRecursively(dst)
+                src.copyToRecursively(dst, followLinks = false)
             }
             assertIs<java.nio.file.AccessDeniedException>(error.suppressedExceptions.single())
 
             assertFalse(dst.resolve("1/3").isReadable()) // access permissions are copied
+
+            dst.resolve("1/3").toFile().setReadable(true)
         }
     }
 
@@ -431,7 +444,7 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
 
         withRestrictedWrite(restricted) {
             val error = assertFailsWith<java.nio.file.FileSystemException> {
-                src.copyToRecursively(dst)
+                src.copyToRecursively(dst, followLinks = false)
             }
             error.suppressedExceptions.forEach {
                 assertIs<java.nio.file.AccessDeniedException>(it)
@@ -452,8 +465,9 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
 
         withRestrictedWrite(restricted) {
             assertFailsWith<java.nio.file.FileSystemException> {
-                src.copyToRecursively(dst) { source, target ->
+                src.copyToRecursively(dst, followLinks = false) { source, target ->
                     if (!source.isDirectory() || !target.isDirectory()) source.copyTo(target, overwrite = true)
+                    CopyActionResult.CONTINUE
                 }
             }.suppressedExceptions.let { suppressed ->
                 // restricted to overwrite: "1/3/4.txt", "1/3/5.txt"
@@ -542,6 +556,7 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         dir2.copyToRecursively(dst, followLinks = true) { source, target ->
             if (!source.isDirectory() || !target.isDirectory(LinkOption.NOFOLLOW_LINKS))
                 source.copyTo(target, overwrite = true)
+            CopyActionResult.CONTINUE
         }
 
         // the dir pointed from dst is not deleted
@@ -567,6 +582,7 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         dir2.copyToRecursively(dst, followLinks = false) { source, target ->
             if (!source.isDirectory(LinkOption.NOFOLLOW_LINKS) || !target.isDirectory(LinkOption.NOFOLLOW_LINKS))
                 source.copyTo(target, overwrite = true)
+            CopyActionResult.CONTINUE
         }
 
         // the dir pointed from dst is not deleted

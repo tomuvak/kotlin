@@ -1084,7 +1084,7 @@ public fun fileVisitor(builderAction: FileVisitorBuilder.() -> Unit): FileVisito
  * an [IOException] is thrown containing those exceptions as suppressed exceptions.
  *
  * @param target the destination path to copy recursively this file to.
- * @param followLinks `true` to traverse for copying content of the directory a symbolic link points to, `false` by default.
+ * @param followLinks `true` to traverse for copying content of the directory a symbolic link points to.
  * @param copyAction the function to call for copying source files/directories to their destination path rooted in [target].
  * By default, it throws if the destination file already exists,
  * it doesn't preserve copied file attributes such as creation/modification date, permissions, etc.,
@@ -1094,14 +1094,15 @@ public fun fileVisitor(builderAction: FileVisitorBuilder.() -> Unit): FileVisito
  */
 public fun Path.copyToRecursively(
     target: Path,
-    followLinks: Boolean = false,
-    copyAction: (source: Path, target: Path) -> Unit = { src, dst ->
+    followLinks: Boolean,
+    copyAction: (source: Path, target: Path) -> CopyActionResult = { src, dst ->
         val options = LinkFollowing.toOptions(followLinks)
         if (!src.isDirectory(*options) || !dst.isDirectory(LinkOption.NOFOLLOW_LINKS)) {
             src.copyTo(dst, *options)
         }
         // else: do nothing, the destination directory already exists
         // TODO: Maybe copy attributes and permissions then? See how `cp` utility overrides
+        CopyActionResult.CONTINUE
     }
 ): Unit {
     if (!exists(LinkOption.NOFOLLOW_LINKS)) {
@@ -1130,20 +1131,11 @@ public fun Path.copyToRecursively(
     }
 }
 
-//public enum class CopyActionResult {
-//    CONTINUE,
-//    TERMINATE
-//}
-//
-//@OptIn(kotlin.experimental.ExperimentalTypeInference::class)
-//@OverloadResolutionByLambdaReturnType
-//@kotlin.jvm.JvmName("copyToRecursivelyCopyActionResult")
-//public fun Path.copyToRecursively(
-//    target: Path,
-//    followLinks: Boolean = false,
-//    copyAction: (source: Path, target: Path) -> CopyActionResult
-//): Unit {
-//}
+
+public enum class CopyActionResult {
+    CONTINUE,
+    TERMINATE
+}
 
 /**
  * Delete this file with all its children.
