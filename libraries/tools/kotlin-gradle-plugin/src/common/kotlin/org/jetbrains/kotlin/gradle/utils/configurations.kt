@@ -27,11 +27,11 @@ internal const val INTRANSITIVE = "intransitive"
  * Gradle Configuration Cache-friendly representation of resolved Configuration
  */
 internal class ResolvedDependencyGraph
-private constructor (
-    private val graphRootProvider: Provider<ResolvedComponentResult>,
+private constructor(
+    private val resolvedComponentsRootProvider: Provider<ResolvedComponentResult>,
     private val artifactCollection: ArtifactCollection
 ) {
-    val root get() = graphRootProvider.get()
+    val root get() = resolvedComponentsRootProvider.get()
     val files: FileCollection get() = artifactCollection.artifactFiles
     val artifacts get() = artifactCollection.artifacts
 
@@ -55,7 +55,7 @@ private constructor (
 
     companion object {
         operator fun invoke(project: Project, configuration: Configuration) = ResolvedDependencyGraph(
-            graphRootProvider = configuration.incoming.resolutionResult.let { rr -> project.provider { rr.root } },
+            resolvedComponentsRootProvider = configuration.incoming.resolutionResult.let { rr -> project.provider { rr.root } },
             artifactCollection = configuration.incoming.artifacts
         )
     }
