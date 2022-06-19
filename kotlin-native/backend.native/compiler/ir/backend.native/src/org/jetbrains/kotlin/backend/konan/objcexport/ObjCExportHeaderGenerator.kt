@@ -771,7 +771,7 @@ internal class ObjCExportTranslatorImpl(
         } else emptyList()
 
         val visibilityComments = when (method.visibility) {
-            DescriptorVisibilities.PROTECTED -> listOf("@note This method has PROTECTED visibility in Kotlin source and is intended only for use by subclasses.")
+            DescriptorVisibilities.PROTECTED -> listOf("@note This method has protected visibility in Kotlin source and is intended only for use by subclasses.")
             else -> emptyList()
         }
         val paramComments = parameters.flatMap { parameter ->
@@ -787,9 +787,9 @@ internal class ObjCExportTranslatorImpl(
     }
 
     private fun mustBeDocumentedAttributeList(annotations: Annotations): List<String> {
-        val methodAnnotations = mustBeDocumentedAnnotations(annotations)
-        return if (methodAnnotations.isNotEmpty()) {
-            listOf(listOf("@attributelist annotations"), methodAnnotations.map { "  $it" }).flatten()
+        val mustBeDocumentedAnnotations = mustBeDocumentedAnnotations(annotations)
+        return if (mustBeDocumentedAnnotations.isNotEmpty()) {
+            listOf("@note annotations") + mustBeDocumentedAnnotations.map { "  $it" }
         } else emptyList()
     }
 
@@ -808,16 +808,16 @@ internal class ObjCExportTranslatorImpl(
         }
     }
 
-    private val mustBeDocumentedAnnotationsStopList = listOf(StandardNames.FqNames.deprecated)
+    private val mustBeDocumentedAnnotationsStopList = setOf(StandardNames.FqNames.deprecated)
     private fun mustBeDocumentedAnnotations(annotations: Annotations): List<String> {
-        return annotations.flatMap { it ->
+        return annotations.mapNotNull { it ->
             it.annotationClass?.let { annotationClass ->
                 if (!mustBeDocumentedAnnotationsStopList.contains(annotationClass.fqNameSafe) && annotationClass.annotations.any { metaAnnotation ->
                             metaAnnotation.fqName == StandardNames.FqNames.mustBeDocumented
                         })
-                    listOf(renderAnnotation(it, annotationClass))
-                else emptyList()
-            } ?: emptyList()
+                    renderAnnotation(it, annotationClass)
+                else null
+            }
         }
     }
 

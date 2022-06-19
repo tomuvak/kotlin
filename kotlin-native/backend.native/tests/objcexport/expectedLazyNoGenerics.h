@@ -950,17 +950,17 @@ __attribute__((swift_name("Bar")))
 + (instancetype)new __attribute__((availability(swift, unavailable, message="use object initializers instead")));
 
 /**
- @attributelist annotations
+ @note annotations
    Foo
  @param fooParam annotations Foo BugReport(assignedTo="me", status="fixed")
  @note This method converts instances of CancellationException to errors.
  Other uncaught Kotlin exceptions are fatal.
- @note This method has PROTECTED visibility in Kotlin source and is intended only for use by subclasses.
+ @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
 */
 - (void)bazNodocParam:(int32_t)nodocParam fooParam:(int32_t)fooParam completionHandler:(void (^)(KtInt * _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("baz(nodocParam:fooParam:completionHandler:)"))) __attribute__((deprecated("warning")));
 
 /**
- @attributelist annotations
+ @note annotations
    Foo
    BugReport(assignedTo="me", status="open")
 */
