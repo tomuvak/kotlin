@@ -13,20 +13,15 @@ import org.jetbrains.kotlin.js.common.isValidES5Identifier
 import org.jetbrains.kotlin.serialization.js.ModuleKind
 
 // TODO: Support module kinds other than plain
+const val magicPropertyName = "__doNotUseOrImplementIt"
 
 fun ExportedModule.toTypeScript(): String {
     return wrapTypeScript(name, moduleKind, declarations.toTypeScript(moduleKind))
 }
 
 fun wrapTypeScript(name: String, moduleKind: ModuleKind, dts: String): String {
-    val declareKeyword = when (moduleKind) {
-        ModuleKind.PLAIN -> ""
-        else -> "declare "
-    }
     val types = """
        type Nullable<T> = T | null | undefined
-       ${declareKeyword}const __doNotImplementIt: unique symbol
-       type __doNotImplementIt = typeof __doNotImplementIt
     """.trimIndent().prependIndent(moduleKind.indent) + "\n"
 
     val declarationsDts = types + dts
@@ -133,11 +128,17 @@ fun ExportedDeclaration.toTypeScript(indent: String, prefix: String = ""): Strin
             val keyword = if (isInterface) "interface" else "class"
             val superInterfacesKeyword = if (isInterface) "extends" else "implements"
 
-            val superClassClause = superClass?.let { it.toExtendsClause(indent) } ?: ""
+            val superClassClause = superClass?.toExtendsClause(indent) ?: ""
             val superInterfacesClause = superInterfaces.toImplementsClause(superInterfacesKeyword, indent)
 
             val members = members
-                .let { if (shouldNotBeImplemented()) it.withMagicProperty() else it }
+                .let {
+                    when {
+                        shouldContainImplementationOfMagicProperty() -> it.withMagicPropertyForInterfaceImplementation(this)
+                        shouldNotBeImplemented() -> it.withMagicInterfaceProperty(this)
+                        else -> it
+                    }
+                }
                 .map {
                     if (!ir.isInner || it !is ExportedFunction || !it.isStatic) {
                         it
@@ -204,14 +205,37 @@ fun List<ExportedType>.toImplementsClause(superInterfacesKeyword: String, indent
 }
 
 fun ExportedClass.shouldNotBeImplemented(): Boolean {
-    return (isInterface && !ir.isExternal) || superInterfaces.any { it is ExportedType.ClassType && !it.ir.isExternal }
+    return isInterface && !ir.isExternal
 }
 
-fun List<ExportedDeclaration>.withMagicProperty(): List<ExportedDeclaration> {
+fun ExportedClass.shouldContainImplementationOfMagicProperty(): Boolean {
+    return !ir.isExternal && superInterfaces.any { it is ExportedType.ClassType && !it.ir.isExternal }
+}
+
+fun ExportedClass.generateTagType(): ExportedType {
+    return ExportedType.InlineInterfaceType(
+        listOf(
+            ExportedProperty(
+                name,
+                ExportedType.Primitive.UniqueSymbol,
+                mutable = false,
+                isMember = true,
+                isStatic = false,
+                isAbstract = false,
+                isProtected = false,
+                isField = true,
+                irGetter = null,
+                irSetter = null,
+            )
+        )
+    )
+}
+
+fun List<ExportedDeclaration>.withMagicInterfaceProperty(klass: ExportedClass): List<ExportedDeclaration> {
     return plus(
         ExportedProperty(
-            "__doNotUseIt",
-            ExportedType.TypeParameter("__doNotImplementIt"),
+            magicPropertyName,
+            klass.generateTagType(),
             mutable = false,
             isMember = true,
             isStatic = false,
@@ -222,6 +246,31 @@ fun List<ExportedDeclaration>.withMagicProperty(): List<ExportedDeclaration> {
             irSetter = null,
         )
     )
+}
+
+fun List<ExportedDeclaration>.withMagicPropertyForInterfaceImplementation(klass: ExportedClass): List<ExportedDeclaration> {
+    return if (klass.superInterfaces.isEmpty()) {
+        this
+    } else {
+        val intersectionOfTypes = klass.superInterfaces
+            .map { ExportedType.PropertyType(it, ExportedType.LiteralType.StringLiteralType(magicPropertyName)) }
+            .reduce(ExportedType::IntersectionType)
+            .let { if (klass.shouldNotBeImplemented()) ExportedType.IntersectionType(klass.generateTagType(), it) else it }
+        plus(
+            ExportedProperty(
+                magicPropertyName,
+                intersectionOfTypes,
+                mutable = false,
+                isMember = true,
+                isStatic = false,
+                isAbstract = false,
+                isProtected = false,
+                isField = true,
+                irGetter = null,
+                irSetter = null,
+            )
+        )
+    }
 }
 
 fun IrClass.asNestedClassAccess(): String {
@@ -310,6 +359,7 @@ fun ExportedType.toTypeScript(indent: String, isInCommentContext: Boolean = fals
         val typeString = type.toTypeScript("", true)
         if (isInCommentContext) typeString else ExportedType.Primitive.Any.toTypeScript(indent) + "/* $typeString */"
     }
+    is ExportedType.PropertyType -> "${container.toTypeScript(indent, isInCommentContext)}[${propertyName.toTypeScript(indent, isInCommentContext)}]"
     is ExportedType.TypeParameter -> if (constraint == null) {
         name
     } else {
