@@ -51,7 +51,7 @@ object StubRenderer {
                 }
             } else null
 
-            val kDocAndComment = (kDoc?.filterNot { it.isEmpty() } ?: emptyList()).toMutableList()
+            val kDocAndComment = kDoc?.filterNot { it.isEmpty() }.orEmpty().toMutableList()
             comment?.contentLines?.let { commentLine ->
                 if (!kDoc.isNullOrEmpty()) kDocAndComment.add(" *")  // Separator between nonempty kDoc and nonempty comment
                 commentLine.forEach { kDocAndComment.add(findPositionToInsertGeneratedCommentLine(kDocAndComment, it), " * $it")}
