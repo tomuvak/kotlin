@@ -9,3 +9,5 @@ KtSuccessCallInfo:
         returnType = A
         symbol = l: A
     simpleAccess = Read:
+
+    typeArgumentsMapping = {}

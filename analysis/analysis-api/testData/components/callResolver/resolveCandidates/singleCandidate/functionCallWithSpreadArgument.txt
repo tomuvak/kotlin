@@ -15,6 +15,7 @@ KtApplicableCallCandidateInfo:
             returnType = kotlin.Int
             symbol = vararg a: kotlin.Int
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       args -> (KtVariableLikeSignature:
         name = a

@@ -21,5 +21,6 @@ KtApplicableCallCandidateInfo:
             returnType = kotlin.String
             symbol = p1: P1
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {}
   isInBestCandidates = true

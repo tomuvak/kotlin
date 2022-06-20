@@ -15,4 +15,5 @@ KtSuccessCallInfo:
         returnType = kotlin.Unit
         symbol = /foo(<extension receiver>: kotlin.String): kotlin.Unit
         valueParameters = []
+    typeArgumentsMapping = {}
     argumentMapping = {}

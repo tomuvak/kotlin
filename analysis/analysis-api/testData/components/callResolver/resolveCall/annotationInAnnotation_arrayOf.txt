@@ -15,6 +15,7 @@ KtSuccessCallInfo:
             returnType = kotlin.String
             symbol = vararg strings: kotlin.String
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       arrayOf("v1", "v2") -> (KtVariableLikeSignature:
         name = strings

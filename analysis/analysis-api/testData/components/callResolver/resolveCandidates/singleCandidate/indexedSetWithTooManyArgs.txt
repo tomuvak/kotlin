@@ -29,6 +29,7 @@ KtInapplicableCallCandidateInfo:
             returnType = kotlin.Boolean
             symbol = value: kotlin.Boolean
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       1 -> (KtVariableLikeSignature:
         name = a

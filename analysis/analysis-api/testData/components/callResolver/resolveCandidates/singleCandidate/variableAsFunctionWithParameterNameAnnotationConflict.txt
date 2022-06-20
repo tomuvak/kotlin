@@ -23,6 +23,7 @@ KtApplicableCallCandidateInfo:
             returnType = @R|kotlin.ParameterName|(name = String(b))  kotlin.String
             symbol = p2: P2
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       1 -> (KtVariableLikeSignature:
         name = a

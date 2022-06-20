@@ -14,4 +14,5 @@ KtSuccessCallInfo:
             returnType = kotlin.String
             symbol = vararg names: kotlin.String
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {}

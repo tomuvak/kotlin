@@ -14,6 +14,7 @@ KtSuccessCallInfo:
             returnType = Annotation
             symbol = vararg annos: Annotation
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       [Annotation("v1", "v2"), Annotation(["v3", "v4"])] -> (KtVariableLikeSignature:
         name = annos

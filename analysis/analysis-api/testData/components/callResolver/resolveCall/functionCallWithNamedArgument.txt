@@ -20,6 +20,7 @@ KtSuccessCallInfo:
             returnType = kotlin.String
             symbol = b: kotlin.String
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       "foo" -> (KtVariableLikeSignature:
         name = b

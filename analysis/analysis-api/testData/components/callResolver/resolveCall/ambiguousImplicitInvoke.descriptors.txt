@@ -19,6 +19,7 @@ KtErrorCallInfo:
               returnType = kotlin.String
               symbol = a: kotlin.String
           ]
+      typeArgumentsMapping = {}
       argumentMapping = {},
     KtSimpleFunctionCall:
       isImplicitInvoke = true
@@ -39,6 +40,7 @@ KtErrorCallInfo:
               returnType = kotlin.Boolean
               symbol = b: kotlin.Boolean
           ]
+      typeArgumentsMapping = {}
       argumentMapping = {}
   ]
   diagnostic = ERROR<NONE_APPLICABLE: None of the following functions can be called with the arguments supplied:

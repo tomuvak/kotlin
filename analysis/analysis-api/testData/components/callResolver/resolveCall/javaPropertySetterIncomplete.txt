@@ -13,3 +13,4 @@ KtSuccessCallInfo:
         symbol = var foo: kotlin.Int
     simpleAccess = Write:
       value = null
+    typeArgumentsMapping = {}

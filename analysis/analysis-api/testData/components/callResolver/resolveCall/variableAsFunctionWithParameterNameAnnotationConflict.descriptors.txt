@@ -23,6 +23,7 @@ KtSuccessCallInfo:
             returnType = @R|kotlin.ParameterName|(name = String(b)) @R|kotlin.ParameterName|(name = String(meNeither))  kotlin.String
             symbol = p2: P2
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       1 -> (KtVariableLikeSignature:
         name = a

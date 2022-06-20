@@ -15,5 +15,6 @@ KtApplicableCallCandidateInfo:
         returnType = kotlin.Unit
         symbol = kotlin/Function1.invoke(<extension receiver>: P1<dispatch receiver>: kotlin.Function1<P1, R>): R
         valueParameters = []
+    typeArgumentsMapping = {}
     argumentMapping = {}
   isInBestCandidates = true

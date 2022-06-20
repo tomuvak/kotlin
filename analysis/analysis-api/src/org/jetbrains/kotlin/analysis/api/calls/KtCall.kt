@@ -193,6 +193,13 @@ public class KtCheckNotNullCall(
  */
 public sealed class KtCallableMemberCall<S : KtCallableSymbol, C : KtSignature<S>> : KtCall() {
     public abstract val partiallyAppliedSymbol: KtPartiallyAppliedSymbol<S, C>
+
+    /**
+     * This map returns inferred type arguments. If the type placeholders was used, actual inferred type will be used as a value.
+     * Keys for this map is from the set [partiallyAppliedSymbol].signature.typeParameters.
+     * In case of resolution or inference error could return empty map.
+     */
+    public abstract val typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType>
 }
 
 public val <S : KtCallableSymbol, C : KtSignature<S>> KtCallableMemberCall<S, C>.symbol: S get() = partiallyAppliedSymbol.symbol
@@ -216,6 +223,7 @@ public typealias KtPartiallyAppliedFunctionSymbol<S> = KtPartiallyAppliedSymbol<
 public class KtSimpleFunctionCall(
     private val _partiallyAppliedSymbol: KtPartiallyAppliedFunctionSymbol<KtFunctionLikeSymbol>,
     argumentMapping: LinkedHashMap<KtExpression, KtVariableLikeSignature<KtValueParameterSymbol>>,
+    private val _typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType>,
     private val _isImplicitInvoke: Boolean,
 ) : KtFunctionCall<KtFunctionLikeSymbol>(argumentMapping) {
     override val token: KtLifetimeToken get() = _partiallyAppliedSymbol.token
@@ -224,6 +232,8 @@ public class KtSimpleFunctionCall(
      * The function and receivers for this call.
      */
     override val partiallyAppliedSymbol: KtPartiallyAppliedFunctionSymbol<KtFunctionLikeSymbol> get() = withValidityAssertion { _partiallyAppliedSymbol }
+
+    override val typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType> get() = withValidityAssertion { _typeArgumentsMapping }
 
     /**
      * Whether this function call is an implicit invoke call on a value that has an `invoke` member function. See
@@ -249,6 +259,8 @@ public class KtAnnotationCall(
      * The function and receivers for this call.
      */
     override val partiallyAppliedSymbol: KtPartiallyAppliedFunctionSymbol<KtConstructorSymbol> get() = withValidityAssertion { _partiallyAppliedSymbol }
+
+    override val typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType> get() = emptyMap()
 }
 
 /**
@@ -274,6 +286,15 @@ public class KtDelegatedConstructorCall(
      */
     override val partiallyAppliedSymbol: KtPartiallyAppliedFunctionSymbol<KtConstructorSymbol> get() = withValidityAssertion { _partiallyAppliedSymbol }
 
+    override val typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType>
+        get() {
+            check(partiallyAppliedSymbol.symbol.typeParameters.isEmpty()) {
+                "Type arguments for delegation constructor to java constructor with type parameters not supported. " +
+                        "Symbol: ${partiallyAppliedSymbol.symbol}"
+            }
+            return emptyMap()
+        }
+
     public val kind: Kind get() = withValidityAssertion { _kind }
 
     public enum class Kind { SUPER_CALL, THIS_CALL }
@@ -291,12 +312,15 @@ public typealias KtPartiallyAppliedVariableSymbol<S> = KtPartiallyAppliedSymbol<
  */
 public class KtSimpleVariableAccessCall(
     private val _partiallyAppliedSymbol: KtPartiallyAppliedVariableSymbol<KtVariableLikeSymbol>,
+    private val _typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType>,
     private val _simpleAccess: KtSimpleVariableAccess
 ) : KtVariableAccessCall() {
 
     override val token: KtLifetimeToken get() = _partiallyAppliedSymbol.token
 
     override val partiallyAppliedSymbol: KtPartiallyAppliedVariableSymbol<KtVariableLikeSymbol> get() = withValidityAssertion { _partiallyAppliedSymbol }
+
+    override val typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType> get() = withValidityAssertion { _typeArgumentsMapping }
 
     /**
      * The type of access to this property.
@@ -363,11 +387,13 @@ public interface KtCompoundAccessCall {
  */
 public class KtCompoundVariableAccessCall(
     private val _partiallyAppliedSymbol: KtPartiallyAppliedVariableSymbol<KtVariableLikeSymbol>,
+    private val _typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType>,
     private val _compoundAccess: KtCompoundAccess
 ) : KtVariableAccessCall(), KtCompoundAccessCall {
     override val token: KtLifetimeToken
         get() = _partiallyAppliedSymbol.token
     override val partiallyAppliedSymbol: KtPartiallyAppliedVariableSymbol<KtVariableLikeSymbol> get() = withValidityAssertion { _partiallyAppliedSymbol }
+    override val typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType> get() = withValidityAssertion { _typeArgumentsMapping }
     override val compoundAccess: KtCompoundAccess get() = withValidityAssertion { _compoundAccess }
 }
 

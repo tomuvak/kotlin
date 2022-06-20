@@ -13,6 +13,7 @@ KtInapplicableCallCandidateInfo:
         returnType = kotlin.Unit
         symbol = /invoke(<extension receiver>: kotlin.Double): kotlin.Unit
         valueParameters = []
+    typeArgumentsMapping = {}
     argumentMapping = {}
   isInBestCandidates = false
 
@@ -31,6 +32,7 @@ KtInapplicableCallCandidateInfo:
         returnType = kotlin.Long
         symbol = /invoke(<extension receiver>: kotlin.Int): kotlin.Long
         valueParameters = []
+    typeArgumentsMapping = {}
     argumentMapping = {}
   isInBestCandidates = false
 
@@ -48,5 +50,6 @@ KtApplicableCallCandidateInfo:
         returnType = kotlin.Double
         symbol = /invoke(<extension receiver>: kotlin.Long): kotlin.Double
         valueParameters = []
+    typeArgumentsMapping = {}
     argumentMapping = {}
   isInBestCandidates = true

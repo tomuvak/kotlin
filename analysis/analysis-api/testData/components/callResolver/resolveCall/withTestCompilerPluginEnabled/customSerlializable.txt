@@ -18,6 +18,7 @@ KtSuccessCallInfo:
             returnType = test.FirstTarget
             symbol = x: test.FirstTarget
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       target -> (KtVariableLikeSignature:
         name = x

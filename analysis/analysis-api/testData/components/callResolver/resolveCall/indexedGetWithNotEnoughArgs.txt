@@ -24,6 +24,7 @@ KtErrorCallInfo:
               returnType = kotlin.String
               symbol = b: kotlin.String
           ]
+      typeArgumentsMapping = {}
       argumentMapping = {
         1 -> (KtVariableLikeSignature:
           name = a

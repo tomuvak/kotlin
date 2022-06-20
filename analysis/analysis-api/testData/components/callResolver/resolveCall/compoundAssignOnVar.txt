@@ -28,3 +28,4 @@ KtSuccessCallInfo:
         receiverType = null
         returnType = kotlin.Int
         symbol = var i: kotlin.Int
+    typeArgumentsMapping = {}

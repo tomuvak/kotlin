@@ -18,6 +18,7 @@ KtSuccessCallInfo:
             returnType = @R|kotlin.ParameterName|(name = String(first))  @R|kotlin.ParameterName|(name = String(second))  kotlin.Int
             symbol = p1: P1
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       1 -> (KtVariableLikeSignature:
         name = first

@@ -21,6 +21,7 @@ KtInapplicableCallCandidateInfo:
             returnType = kotlin.Char
             symbol = a: kotlin.Char
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       1 -> (KtVariableLikeSignature:
         name = t
@@ -53,6 +54,7 @@ KtInapplicableCallCandidateInfo:
             returnType = kotlin.Boolean
             symbol = b: kotlin.Boolean
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       1 -> (KtVariableLikeSignature:
         name = u
@@ -85,6 +87,7 @@ KtInapplicableCallCandidateInfo:
             returnType = kotlin.String
             symbol = c: kotlin.String
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {
       1 -> (KtVariableLikeSignature:
         name = v

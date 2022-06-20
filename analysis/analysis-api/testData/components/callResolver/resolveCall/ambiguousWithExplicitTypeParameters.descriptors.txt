@@ -21,6 +21,7 @@ KtErrorCallInfo:
               returnType = kotlin.Char
               symbol = a: kotlin.Char
           ]
+      typeArgumentsMapping = {}
       argumentMapping = {
         1 -> (KtVariableLikeSignature:
           name = t
@@ -49,6 +50,7 @@ KtErrorCallInfo:
               returnType = kotlin.Boolean
               symbol = b: kotlin.Boolean
           ]
+      typeArgumentsMapping = {}
       argumentMapping = {
         1 -> (KtVariableLikeSignature:
           name = u
@@ -77,6 +79,7 @@ KtErrorCallInfo:
               returnType = kotlin.String
               symbol = c: kotlin.String
           ]
+      typeArgumentsMapping = {}
       argumentMapping = {
         1 -> (KtVariableLikeSignature:
           name = v

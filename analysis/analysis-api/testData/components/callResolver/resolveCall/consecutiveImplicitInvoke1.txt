@@ -12,4 +12,5 @@ KtSuccessCallInfo:
         returnType = kotlin.Long
         symbol = /invoke(<extension receiver>: kotlin.Int): kotlin.Long
         valueParameters = []
+    typeArgumentsMapping = {}
     argumentMapping = {}

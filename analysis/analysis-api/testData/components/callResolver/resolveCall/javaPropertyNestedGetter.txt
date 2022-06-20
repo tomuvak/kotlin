@@ -12,3 +12,5 @@ KtSuccessCallInfo:
         returnType = ft<JavaSubClass, JavaSubClass?>
         symbol = val sub: ft<JavaSubClass, JavaSubClass?>
     simpleAccess = Read:
+
+    typeArgumentsMapping = {}

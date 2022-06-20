@@ -12,5 +12,6 @@ KtApplicableCallCandidateInfo:
         returnType = kotlin.String
         symbol = /invoke(<extension receiver>: kotlin.Int): kotlin.String
         valueParameters = []
+    typeArgumentsMapping = {}
     argumentMapping = {}
   isInBestCandidates = true

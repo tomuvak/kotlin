@@ -19,6 +19,7 @@ KtInapplicableCallCandidateInfo:
             returnType = kotlin.String
             symbol = a: kotlin.String
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {}
   isInBestCandidates = true
 
@@ -43,6 +44,7 @@ KtInapplicableCallCandidateInfo:
             returnType = kotlin.Boolean
             symbol = b: kotlin.Boolean
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {}
   isInBestCandidates = true
 
@@ -64,5 +66,6 @@ KtInapplicableCallCandidateInfo:
             returnType = kotlin.Char
             symbol = c: kotlin.Char
         ]
+    typeArgumentsMapping = {}
     argumentMapping = {}
   isInBestCandidates = false

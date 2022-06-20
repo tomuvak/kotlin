@@ -13,3 +13,5 @@ KtSuccessCallInfo:
         returnType = kotlin.Int
         symbol = val foo: kotlin.Int
     simpleAccess = Read:
+
+    typeArgumentsMapping = {}

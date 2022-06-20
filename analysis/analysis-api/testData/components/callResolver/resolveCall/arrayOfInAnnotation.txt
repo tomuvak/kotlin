@@ -15,6 +15,9 @@ KtSuccessCallInfo:
             returnType = kotlin.Int
             symbol = vararg elements: T
         ]
+    typeArgumentsMapping = {
+      T -> (kotlin.Int)
+    }
     argumentMapping = {
       1 -> (KtVariableLikeSignature:
         name = elements

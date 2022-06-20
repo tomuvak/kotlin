@@ -12,5 +12,6 @@ KtApplicableCallCandidateInfo:
         returnType = kotlin.Unit
         symbol = /JavaClass.javaMethod(<dispatch receiver>: JavaClass): kotlin.Unit
         valueParameters = []
+    typeArgumentsMapping = {}
     argumentMapping = {}
   isInBestCandidates = true
