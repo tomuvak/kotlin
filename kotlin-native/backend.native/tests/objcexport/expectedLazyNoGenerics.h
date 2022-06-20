@@ -958,6 +958,7 @@ __attribute__((swift_name("Bar")))
  * @note This method has protected visibility in Kotlin source and is intended only for use by subclasses.
 */
 - (void)bazNodocParam:(int32_t)nodocParam fooParam:(int32_t)fooParam completionHandler:(void (^)(KtInt * _Nullable, NSError * _Nullable))completionHandler __attribute__((swift_name("baz(nodocParam:fooParam:completionHandler:)"))) __attribute__((deprecated("warning")));
+- (void)notKDoc __attribute__((swift_name("notKDoc()")));
 
 /**
  * @note annotations

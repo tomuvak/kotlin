@@ -47,4 +47,7 @@ class Bar {
         get() {
             return "Hello World!"
         }
+
+    // Not a kDoc-formatted comment
+    fun notKDoc() {}
 }
