@@ -56,23 +56,14 @@ fun checkSteppingTestResult(
         if (line.startsWith(EXPECTATIONS_MARKER)) {
             actual.add(line)
             val backendsAndFrontends = line.removePrefix(EXPECTATIONS_MARKER).splitToSequence(Regex("\\s+")).filter { it.isNotEmpty() }
-            currentBackends = when (line) {
-                EXPECTATIONS_MARKER -> setOf(TargetBackend.ANY)
-                else -> {
-                    backendsAndFrontends
-                        .mapNotNullTo(mutableSetOf()) { valueOfOrNull<TargetBackend>(it) }
-                        .takeIf { it.isNotEmpty() }
-                        ?: setOf(TargetBackend.ANY)
-                }
-            }
-            currentFrontends = when (line) {
-                EXPECTATIONS_MARKER -> setOf(frontendKind)
-                else -> {
-                    backendsAndFrontends
-                        .mapNotNullTo(mutableSetOf(), FrontendKinds::fromString)
-                        .takeIf { it.isNotEmpty() } ?: setOf(frontendKind)
-                }
-            }
+            currentBackends = backendsAndFrontends
+                .mapNotNullTo(mutableSetOf()) { valueOfOrNull<TargetBackend>(it) }
+                .takeIf { it.isNotEmpty() }
+                ?: setOf(TargetBackend.ANY)
+            currentFrontends = backendsAndFrontends
+                .mapNotNullTo(mutableSetOf(), FrontendKinds::fromString)
+                .takeIf { it.isNotEmpty() }
+                ?: setOf(frontendKind)
             continue
         }
         if ((currentBackends.contains(TargetBackend.ANY) || currentBackends.contains(targetBackend)) &&
