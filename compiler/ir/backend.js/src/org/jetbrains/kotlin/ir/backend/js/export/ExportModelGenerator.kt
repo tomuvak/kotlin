@@ -252,11 +252,7 @@ class ExportModelGenerator(val context: JsIrBackendContext, val generateNamespac
 
         val (members, nestedClasses) = exportClassDeclarations(klass)
 
-        return exportClass(
-            klass,
-            members,
-            nestedClasses
-        )
+        return exportClass(klass, members, nestedClasses)
     }
 
     private fun exportEnumClass(
@@ -462,7 +458,7 @@ class ExportModelGenerator(val context: JsIrBackendContext, val generateNamespac
             ?.let { exportType(it).takeIf { it !is ExportedType.ErrorType } }
 
         val superInterfaces = klass.superTypes
-            .filter { it.classifierOrFail.isInterface }
+            .filter { it.shouldPresentInsideImplementsClause() }
             .map { exportType(it) }
             .filter { it !is ExportedType.ErrorType }
 
@@ -507,6 +503,11 @@ class ExportModelGenerator(val context: JsIrBackendContext, val generateNamespac
         return exportedClass
     }
 
+    private fun IrType.shouldPresentInsideImplementsClause(): Boolean {
+        val classifier = classifierOrFail
+        return classifier.isInterface || (classifier.owner as? IrDeclaration)?.isJsImplicitExport() == true
+    }
+
     private fun exportAsEnumMember(
         candidate: IrDeclarationWithName,
         enumEntriesToOrdinal: Map<IrEnumEntry, Int>
@@ -545,7 +546,9 @@ class ExportModelGenerator(val context: JsIrBackendContext, val generateNamespac
     }
 
     private fun IrType.canBeUsedAsSuperTypeOfExportedClasses(): Boolean =
-        !this.isAny() && classifierOrNull != context.irBuiltIns.enumClass
+        !isAny() &&
+                classifierOrNull != context.irBuiltIns.enumClass &&
+                (classifierOrNull?.owner as? IrDeclaration)?.isJsImplicitExport() != true
 
     private fun exportTypeArgument(type: IrTypeArgument): ExportedType {
         if (type is IrTypeProjection)
