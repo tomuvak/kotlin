@@ -111,52 +111,30 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
 
     @Test
     fun deleteBaseSymlinkToFile() {
-        for (followLinks in listOf(true, false)) {
-            val file = createTempFile().cleanup()
-            val link = createTempDirectory().cleanupRecursively().resolve("link").tryCreateSymbolicLinkTo(file) ?: return
+        val file = createTempFile().cleanup()
+        val link = createTempDirectory().cleanupRecursively().resolve("link").tryCreateSymbolicLinkTo(file) ?: return
 
-            link.deleteRecursively(followLinks)
-            assertFalse(link.exists(LinkOption.NOFOLLOW_LINKS))
-            assertTrue(file.exists())
-        }
-    }
-
-    @Test
-    fun deleteBaseSymlinkToDirectoryFollow() {
-        val dir = createTestFiles().cleanupRecursively()
-        val link = createTempDirectory().cleanupRecursively().resolve("link").tryCreateSymbolicLinkTo(dir) ?: return
-
-        link.deleteRecursively(followLinks = true)
+        link.deleteRecursively()
         assertFalse(link.exists(LinkOption.NOFOLLOW_LINKS))
-        assertEquals(dir, dir.walkIncludeDirectories().single())
+        assertTrue(file.exists())
     }
 
     @Test
-    fun deleteBaseSymlinkToDirectoryNoFollow() {
+    fun deleteBaseSymlinkToDirectory() {
         val dir = createTestFiles().cleanupRecursively()
         val link = createTempDirectory().cleanupRecursively().resolve("link").tryCreateSymbolicLinkTo(dir) ?: return
 
-        link.deleteRecursively(followLinks = false)
+        link.deleteRecursively()
         assertFalse(link.exists(LinkOption.NOFOLLOW_LINKS))
         testVisitedFiles(listOf("") + referenceFilenames, dir.walkIncludeDirectories(), dir)
     }
 
     @Test
-    fun deleteFollowSymlinks() {
+    fun deleteSymlinkToDirectory() {
         val dir1 = createTestFiles().cleanupRecursively()
         val dir2 = createTestFiles().cleanupRecursively().also { it.resolve("8/link").tryCreateSymbolicLinkTo(dir1) ?: return }
 
-        dir2.deleteRecursively(followLinks = true)
-        assertFalse(dir2.exists())
-        assertEquals(dir1, dir1.walkIncludeDirectories().single())
-    }
-
-    @Test
-    fun deleteNoFollowSymlinks() {
-        val dir1 = createTestFiles().cleanupRecursively()
-        val dir2 = createTestFiles().cleanupRecursively().also { it.resolve("8/link").tryCreateSymbolicLinkTo(dir1) ?: return }
-
-        dir2.deleteRecursively(followLinks = false)
+        dir2.deleteRecursively()
         assertFalse(dir2.exists())
         testVisitedFiles(listOf("") + referenceFilenames, dir1.walkIncludeDirectories(), dir1)
     }
@@ -167,10 +145,10 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         val link = createTempDirectory().resolve("link").tryCreateSymbolicLinkTo(dir) ?: return
         val linkToLink = createTempDirectory().resolve("linkToLink").tryCreateSymbolicLinkTo(link) ?: return
 
-        linkToLink.deleteRecursively(followLinks = true)
+        linkToLink.deleteRecursively()
         assertFalse(linkToLink.exists(LinkOption.NOFOLLOW_LINKS))
-        assertTrue(link.exists(LinkOption.NOFOLLOW_LINKS)) // the mediator symlink is not deleted
-        assertEquals(dir, dir.walkIncludeDirectories().single())
+        assertTrue(link.exists(LinkOption.NOFOLLOW_LINKS))
+        testVisitedFiles(listOf("") + referenceFilenames, dir.walkIncludeDirectories(), dir)
     }
 
     @Test
@@ -179,25 +157,10 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         val original = basedir.resolve("1")
         original.resolve("2/link").tryCreateSymbolicLinkTo(original) ?: return
 
-        assertFailsWith<java.nio.file.FileSystemException> {
-            basedir.deleteRecursively(followLinks = true)
-        }.let { exception ->
-            assertEquals(2, exception.suppressedExceptions.size)
-            // a loop was detected
-            assertIs<java.nio.file.FileSystemLoopException>(exception.suppressedExceptions[0])
-
-            // TODO: should have been only one suppressed exception,
-            //  Because links are followed symlink parent is parent of the target, not symlinks itself.
-            //  Thus exception for the symlink parent is not skipped.
-            assertIs<java.nio.file.DirectoryNotEmptyException>(exception.suppressedExceptions[1])
-        }
-        assertTrue(basedir.exists()) // partial delete have taken place
-
-        basedir.deleteRecursively(followLinks = false)
+        basedir.deleteRecursively()
         assertFalse(basedir.exists())
     }
-/*
-    // TODO: Deletion of a cyclic symbolic links will throw FileSystemLoopException, but the subtree will be deleted
+
     @Test
     fun deleteSymlinkCyclicWithTwo() {
         val basedir = createTestFiles().cleanupRecursively()
@@ -206,17 +169,9 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         dir8.resolve("linkTo2").tryCreateSymbolicLinkTo(dir2) ?: return
         dir2.resolve("linkTo8").tryCreateSymbolicLinkTo(dir8) ?: return
 
-        assertFailsWith<java.nio.file.FileSystemException> {
-            basedir.deleteRecursively(followLinks = true)
-        }.let { exception ->
-            assertEquals(2, exception.suppressedExceptions.filterIsInstance<java.nio.file.FileSystemLoopException>().size)
-        }
-        assertTrue(basedir.exists()) // partial delete have taken place
-
-        basedir.deleteRecursively(followLinks = false)
+        basedir.deleteRecursively()
         assertFalse(basedir.exists())
     }
-*/
 
     @Test
     fun deleteSymlinkPointingToItself() {
@@ -224,9 +179,7 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         val link = basedir.resolve("link")
         link.tryCreateSymbolicLinkTo(link) ?: return
 
-//        assertFailsWith<java.nio.file.FileSystemException> { // Thrown from readAttributes: "Too many levels of symbolic links"
-        basedir.deleteRecursively(followLinks = true)
-//        }
+        basedir.deleteRecursively()
         assertFalse(basedir.exists())
     }
 
@@ -237,9 +190,7 @@ class CopyDeleteRecursivelyTest : AbstractPathTest() {
         val link2 = basedir.resolve("link2").tryCreateSymbolicLinkTo(link1) ?: return
         link1.tryCreateSymbolicLinkTo(link2) ?: return
 
-//        assertFailsWith<java.nio.file.FileSystemException> { // Thrown from readAttributes: "Too many levels of symbolic links"
-        basedir.deleteRecursively(followLinks = true)
-//        }
+        basedir.deleteRecursively()
         assertFalse(basedir.exists())
     }
 

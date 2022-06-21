@@ -1139,21 +1139,21 @@ public enum class CopyActionResult {
 
 /**
  * Delete this file with all its children.
- * Note that if this operation fails then partial deletion may have taken place.
+ * Note that if this function throws then partial deletion may have taken place.
+ *
+ * This function does nothing if the file located by this path does not exist.
  *
  * If an I/O exception occurs attempting to read, open or delete any file under the given directory,
  * this method skips that file and continues. All such exceptions are collected and, after attempting to delete all files,
  * an [IOException] is thrown containing those exceptions as suppressed exceptions.
  *
- * @param followLinks `true` to recursively delete the file/directory a symbolic link points to,
- * `false` (default) to delete only the symbolic link itself.
  * @throws IOException if any file in the tree can't be deleted for any reason.
  */
-public fun Path.deleteRecursively(followLinks: Boolean = false): Unit {
+public fun Path.deleteRecursively(): Unit {
     val suppressedExceptions = mutableListOf<Throwable>()
     val notEmptyDirectoriesToSkip = hashSetOf<Path>()
 
-    SecurePathTreeWalk(followLinks).onFile { secureDirectoryStream, file ->
+    SecurePathTreeWalk(followLinks = false).onFile { secureDirectoryStream, file ->
         if (secureDirectoryStream != null) {
             secureDirectoryStream.deleteFile(file) // deletes symlink itself, not its target
         } else {
