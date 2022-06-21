@@ -32,6 +32,7 @@ import processInterface = JS_TESTS.foo.processInterface;
 import OuterClass = JS_TESTS.foo.OuterClass;
 import KT38262 = JS_TESTS.foo.KT38262;
 import JsNameTest = JS_TESTS.foo.JsNameTest;
+import GenericClassWithConstraint = JS_TESTS.foo.GenericClassWithConstraint;
 
 function assert(condition: boolean) {
     if (!condition) {
@@ -165,6 +166,9 @@ function box(): string {
     const jsNameNestedTest = JsNameTest.Companion.createChild(42);
 
     assert(jsNameNestedTest.value === 42)
+
+    const genericClassInstance = new GenericClassWithConstraint(new TestInterfaceImpl("test"))
+    assert(processInterface(genericClassInstance.test) == "Owner TestInterfaceImpl has value 'test'")
 
     return "OK";
 }

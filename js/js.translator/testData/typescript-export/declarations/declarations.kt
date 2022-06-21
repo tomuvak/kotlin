@@ -257,3 +257,6 @@ data class KT39423(
     val a: String,
     val b: Int? = null
 )
+
+@JsExport
+class GenericClassWithConstraint<T: TestInterface>(val test: T)

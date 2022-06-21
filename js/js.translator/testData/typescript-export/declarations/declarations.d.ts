@@ -198,5 +198,9 @@ declare namespace JS_TESTS {
             hashCode(): number;
             equals(other: Nullable<any>): boolean;
         }
+        class GenericClassWithConstraint<T extends foo.TestInterface> {
+            constructor(test: T);
+            get test(): T;
+        }
     }
 }

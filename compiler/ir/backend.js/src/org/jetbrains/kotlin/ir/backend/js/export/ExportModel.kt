@@ -72,7 +72,7 @@ data class ExportedClass(
     val isAbstract: Boolean = false,
     val superClass: ExportedType? = null,
     val superInterfaces: List<ExportedType> = emptyList(),
-    val typeParameters: List<String>,
+    val typeParameters: List<ExportedType.TypeParameter>,
     val members: List<ExportedDeclaration>,
     val nestedClasses: List<ExportedClass>,
     val ir: IrClass

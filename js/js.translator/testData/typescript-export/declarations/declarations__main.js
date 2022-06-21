@@ -32,6 +32,7 @@ var processInterface = JS_TESTS.foo.processInterface;
 var OuterClass = JS_TESTS.foo.OuterClass;
 var KT38262 = JS_TESTS.foo.KT38262;
 var JsNameTest = JS_TESTS.foo.JsNameTest;
+var GenericClassWithConstraint = JS_TESTS.foo.GenericClassWithConstraint;
 function assert(condition) {
     if (!condition) {
         throw "Assertion failed";
@@ -135,5 +136,7 @@ function box() {
     assert(jsNameTest.runTest() === "JsNameTest");
     var jsNameNestedTest = JsNameTest.Companion.createChild(42);
     assert(jsNameNestedTest.value === 42);
+    var genericClassInstance = new GenericClassWithConstraint(new TestInterfaceImpl("test"));
+    assert(processInterface(genericClassInstance.test) == "Owner TestInterfaceImpl has value 'test'");
     return "OK";
 }

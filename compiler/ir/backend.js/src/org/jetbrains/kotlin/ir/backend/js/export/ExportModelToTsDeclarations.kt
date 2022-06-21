@@ -160,7 +160,7 @@ fun ExportedDeclaration.toTypeScript(indent: String, prefix: String = ""): Strin
 
             val renderedTypeParameters =
                 if (typeParameters.isNotEmpty())
-                    "<" + typeParameters.joinToString(", ") + ">"
+                    "<" + typeParameters.joinToString(", ") { it.toTypeScript(indent) } + ">"
                 else
                     ""
 

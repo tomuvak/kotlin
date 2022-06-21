@@ -337,7 +337,7 @@ class ExportModelGenerator(
         members: List<ExportedDeclaration>,
         nestedClasses: List<ExportedClass>
     ): ExportedDeclaration {
-        val typeParameters = klass.typeParameters.map { it.name.identifier }
+        val typeParameters = klass.typeParameters.map(::exportTypeParameter)
 
         // TODO: Handle non-exported super types
 
