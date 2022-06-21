@@ -33957,6 +33957,12 @@ public class DiagnosticTestGenerated extends AbstractDiagnosticTest {
             }
 
             @Test
+            @TestMetadata("extractingEntireCall.kt")
+            public void testExtractingEntireCall() throws Exception {
+                runTest("compiler/testData/diagnostics/tests/when/extractingEntireCall.kt");
+            }
+
+            @Test
             @TestMetadata("intersectionExhaustivenessComplex.kt")
             public void testIntersectionExhaustivenessComplex() throws Exception {
                 runTest("compiler/testData/diagnostics/tests/when/intersectionExhaustivenessComplex.kt");
