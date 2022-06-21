@@ -5,9 +5,16 @@
 
 package org.jetbrains.kotlin.ir.backend.js.export
 
+import org.jetbrains.kotlin.ir.backend.js.JsIrBackendContext
+import org.jetbrains.kotlin.ir.backend.js.utils.getFqNameWithJsNameWhenAvailable
 import org.jetbrains.kotlin.ir.backend.js.utils.getJsNameOrKotlinName
 import org.jetbrains.kotlin.ir.backend.js.utils.sanitizeName
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrDeclaration
+import org.jetbrains.kotlin.ir.types.classifierOrFail
+import org.jetbrains.kotlin.ir.types.classifierOrNull
+import org.jetbrains.kotlin.ir.util.fqNameWhenAvailable
+import org.jetbrains.kotlin.ir.util.isInterface
 import org.jetbrains.kotlin.ir.util.parentAsClass
 import org.jetbrains.kotlin.js.common.isValidES5Identifier
 import org.jetbrains.kotlin.serialization.js.ModuleKind
@@ -131,22 +138,14 @@ fun ExportedDeclaration.toTypeScript(indent: String, prefix: String = ""): Strin
             val superClassClause = superClass?.toExtendsClause(indent) ?: ""
             val superInterfacesClause = superInterfaces.toImplementsClause(superInterfacesKeyword, indent)
 
-            val members = members
-                .let {
-                    when {
-                        shouldContainImplementationOfMagicProperty() -> it.withMagicPropertyForInterfaceImplementation(this)
-                        shouldNotBeImplemented() -> it.withMagicInterfaceProperty(this)
-                        else -> it
-                    }
+            val members = members.map {
+                if (!ir.isInner || it !is ExportedFunction || !it.isStatic) {
+                    it
+                } else {
+                    // Remove $outer argument from secondary constructors of inner classes
+                    it.copy(parameters = it.parameters.drop(1))
                 }
-                .map {
-                    if (!ir.isInner || it !is ExportedFunction || !it.isStatic) {
-                        it
-                    } else {
-                        // Remove $outer argument from secondary constructors of inner classes
-                        it.copy(parameters = it.parameters.drop(1))
-                    }
-                }
+            }
 
             val (innerClasses, nonInnerClasses) = nestedClasses.partition { it.ir.isInner }
             val innerClassesProperties = innerClasses.map { it.toReadonlyProperty() }
@@ -201,75 +200,6 @@ fun List<ExportedType>.toImplementsClause(superInterfacesKeyword: String, indent
             " $superInterfacesKeyword " + exportedInterfaces.joinToString(", ") { it.toTypeScript(indent) } + nonExportedInterfacesTsString
         }
         else -> ""
-    }
-}
-
-fun ExportedClass.shouldNotBeImplemented(): Boolean {
-    return isInterface && !ir.isExternal
-}
-
-fun ExportedClass.shouldContainImplementationOfMagicProperty(): Boolean {
-    return !ir.isExternal && superInterfaces.any { it is ExportedType.ClassType && !it.ir.isExternal }
-}
-
-fun ExportedClass.generateTagType(): ExportedType {
-    return ExportedType.InlineInterfaceType(
-        listOf(
-            ExportedProperty(
-                name,
-                ExportedType.Primitive.UniqueSymbol,
-                mutable = false,
-                isMember = true,
-                isStatic = false,
-                isAbstract = false,
-                isProtected = false,
-                isField = true,
-                irGetter = null,
-                irSetter = null,
-            )
-        )
-    )
-}
-
-fun List<ExportedDeclaration>.withMagicInterfaceProperty(klass: ExportedClass): List<ExportedDeclaration> {
-    return plus(
-        ExportedProperty(
-            magicPropertyName,
-            klass.generateTagType(),
-            mutable = false,
-            isMember = true,
-            isStatic = false,
-            isAbstract = false,
-            isProtected = false,
-            isField = true,
-            irGetter = null,
-            irSetter = null,
-        )
-    )
-}
-
-fun List<ExportedDeclaration>.withMagicPropertyForInterfaceImplementation(klass: ExportedClass): List<ExportedDeclaration> {
-    return if (klass.superInterfaces.isEmpty()) {
-        this
-    } else {
-        val intersectionOfTypes = klass.superInterfaces
-            .map { ExportedType.PropertyType(it, ExportedType.LiteralType.StringLiteralType(magicPropertyName)) }
-            .reduce(ExportedType::IntersectionType)
-            .let { if (klass.shouldNotBeImplemented()) ExportedType.IntersectionType(klass.generateTagType(), it) else it }
-        plus(
-            ExportedProperty(
-                magicPropertyName,
-                intersectionOfTypes,
-                mutable = false,
-                isMember = true,
-                isStatic = false,
-                isAbstract = false,
-                isProtected = false,
-                isField = true,
-                irGetter = null,
-                irSetter = null,
-            )
-        )
     }
 }
 
