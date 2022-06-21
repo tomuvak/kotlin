@@ -1105,7 +1105,7 @@ public fun Path.copyToRecursively(
         CopyActionResult.CONTINUE
     }
 ): Unit {
-    if (!exists(LinkOption.NOFOLLOW_LINKS)) {
+    if (!exists(*LinkFollowing.toOptions(followLinks))) {
         throw NoSuchFileException(this.toString(), target.toString(), "The source file doesn't exist.")
     }
 
