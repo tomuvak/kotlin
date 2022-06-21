@@ -35,6 +35,7 @@ import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.kotlin.analysis.api.lifetime.allowAnalysisOnEdt
 import org.jetbrains.kotlin.asJava.classes.*
 import org.jetbrains.kotlin.light.classes.symbol.classes.checkIsInheritor
+import org.jetbrains.kotlin.psi.KtClassOrObject
 import javax.swing.Icon
 
 abstract class FirLightClassBase protected constructor(
@@ -113,10 +114,14 @@ abstract class FirLightClassBase protected constructor(
         val thisClassOrigin = kotlinOrigin
         val baseClassOrigin = (baseClass as? KtLightClass)?.kotlinOrigin
 
+        fun isChildOfBaseClass(childClass: KtClassOrObject?, baseClass: PsiClass): Boolean =
+            childClass?.superTypeListEntries?.any { it.project == baseClass.project && it.typeAsUserType?.referencedName == baseClass.name }
+                ?: false
+
         return if (baseClassOrigin != null && thisClassOrigin != null) {
             thisClassOrigin.checkIsInheritor(baseClassOrigin, checkDeep)
         } else {
-            InheritanceImplUtil.isInheritor(this, baseClass, checkDeep)
+            isChildOfBaseClass(thisClassOrigin, baseClass) || InheritanceImplUtil.isInheritor(this, baseClass, checkDeep)
         }
     }
 
