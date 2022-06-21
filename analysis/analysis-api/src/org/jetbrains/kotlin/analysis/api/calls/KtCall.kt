@@ -260,7 +260,7 @@ public class KtAnnotationCall(
      */
     override val partiallyAppliedSymbol: KtPartiallyAppliedFunctionSymbol<KtConstructorSymbol> get() = withValidityAssertion { _partiallyAppliedSymbol }
 
-    override val typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType> get() = emptyMap()
+    override val typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType> get() = withValidityAssertion { emptyMap() }
 }
 
 /**
@@ -287,12 +287,12 @@ public class KtDelegatedConstructorCall(
     override val partiallyAppliedSymbol: KtPartiallyAppliedFunctionSymbol<KtConstructorSymbol> get() = withValidityAssertion { _partiallyAppliedSymbol }
 
     override val typeArgumentsMapping: Map<KtTypeParameterSymbol, KtType>
-        get() {
+        get() = withValidityAssertion {
             check(partiallyAppliedSymbol.symbol.typeParameters.isEmpty()) {
                 "Type arguments for delegation constructor to java constructor with type parameters not supported. " +
                         "Symbol: ${partiallyAppliedSymbol.symbol}"
             }
-            return emptyMap()
+            emptyMap()
         }
 
     public val kind: Kind get() = withValidityAssertion { _kind }
