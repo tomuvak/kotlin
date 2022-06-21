@@ -79,10 +79,10 @@ dependencies {
 
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:${commonDependencyVersion("org.junit", "junit-bom")}")
 
-    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
-    testImplementation("io.ktor:ktor-client-core:2.0.2")
-    testImplementation("io.ktor:ktor-client-cio:2.0.2")
-    testImplementation("io.ktor:ktor-client-websockets:2.0.2")
+    testImplementation(commonDependency("org.jetbrains.kotlinx", "kotlinx-serialization-json"))
+    testImplementation(commonDependency("io.ktor", "ktor-client-core"))
+    testImplementation(commonDependency("io.ktor", "ktor-client-cio"))
+    testImplementation(commonDependency("io.ktor", "ktor-client-websockets"))
 }
 
 val generationRoot = projectDir.resolve("tests-gen")
